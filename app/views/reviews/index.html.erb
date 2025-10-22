@@ -64,8 +64,8 @@
             </div>
 
             <div class="review-actions">
-              <%= link_to "Edit", edit_review_path(review), class: "btn btn--primary btn--small" %>
-              <%= link_to "View Movie", movie_path(review.movie), class: "btn btn--ghost btn--small" %>
+              <%= link_to "✏️ Edit Review", edit_review_path(review), class: "btn btn--primary btn--small" %>
+              <%= link_to "👁️ View Details", movie_path(review.movie.id), class: "btn btn--ghost btn--small" %>
             </div>
           </div>
         </div>
