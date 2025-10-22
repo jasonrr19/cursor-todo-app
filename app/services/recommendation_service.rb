@@ -80,6 +80,54 @@ class RecommendationService
     result_movies
   end
 
+  def recommendations_with_fallback_info(limit: 20, exclude_reviewed: true, exclude_watched: true)
+    return [[], false] unless @preferences
+
+    # Start with all movies, excluding 0-vote movies
+    base_movies = Movie.includes(:genres, :production_country, :original_language, :people)
+                       .where('vote_count > 0')
+    
+    # Try with strict filters first
+    movies = apply_strict_filters(base_movies)
+    fallback_mode = false
+    
+    # Detect if we're using fallback
+    if movies.empty? && @preferences.preferred_genre_ids.any?
+      fallback_mode = true
+      movies = base_movies.joins(:genres)
+                          .where(genres: { tmdb_id: @preferences.preferred_genre_ids })
+                          .distinct
+    end
+    
+    # Continue with normal recommendation logic
+    if exclude_reviewed
+      reviewed_movie_ids = @user.reviews.pluck(:movie_id)
+      movies = movies.where.not(id: reviewed_movie_ids) if reviewed_movie_ids.any?
+    end
+
+    if exclude_watched
+      watched_movie_ids = @user.watched_movies.pluck(:movie_id)
+      movies = movies.where.not(id: watched_movie_ids) if watched_movie_ids.any?
+    end
+
+    positive_watched_movies = get_positive_watched_movies
+    scored_movies = movies.map do |movie|
+      {
+        movie: movie,
+        score: calculate_score(movie, nil, positive_watched_movies)
+      }
+    end
+
+    result_movies = scored_movies
+      .sort_by { |item| -item[:score] }
+      .first(limit)
+      .map { |item| item[:movie] }
+
+    track_recommendation_events(result_movies, nil)
+
+    [result_movies, fallback_mode]
+  end
+
   def serendipity_suggestions(limit: 5)
     return [] unless @preferences
 

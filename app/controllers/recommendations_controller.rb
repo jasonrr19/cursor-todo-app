@@ -5,10 +5,11 @@ class RecommendationsController < ApplicationController
     @user = current_user
     @recommendations = []
     @serendipity_suggestions = []
+    @fallback_mode = false
     
     if @user&.user_preference
       service = RecommendationService.new(@user)
-      @recommendations = service.recommendations(limit: 20)
+      @recommendations, @fallback_mode = service.recommendations_with_fallback_info(limit: 20)
       @serendipity_suggestions = service.serendipity_suggestions(limit: 5)
       
       # Track impressions for regular recommendations

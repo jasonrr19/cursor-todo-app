@@ -4,6 +4,15 @@
     <p class="recommendations-subtitle">Movies tailored to your preferences</p>
   </div>
 
+  <% if @fallback_mode && @user&.user_preference %>
+    <div class="fallback-notice">
+      <span class="fallback-icon">ℹ️</span>
+      <div class="fallback-content">
+        <strong>Good news!</strong> While we don't have <%= @user.user_preference.preferred_languages.map(&:name).join(', ') %> films from <%= @user.user_preference.preferred_countries.map(&:name).join(', ') %> right now, we've found some popular <strong><%= @user.user_preference.preferred_genres.map(&:name).join(', ') %></strong> films that might interest you!
+      </div>
+    </div>
+  <% end %>
+
   <% if @recommendations.any? %>
     <div class="recommendations-grid">
       <% @recommendations.each do |movie| %>
@@ -590,5 +599,45 @@
   opacity: 0.9;
   font-weight: 400;
   display: block;
+}
+
+/* Fallback Notice Styles */
+.fallback-notice {
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 152, 0, 0.1) 100%);
+  border: 2px solid #ffc107;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  animation: fade-in 0.5s ease-in-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fallback-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.fallback-content {
+  color: var(--text-primary);
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.fallback-content strong {
+  color: #ffc107;
+  font-weight: 600;
 }
 </style>
