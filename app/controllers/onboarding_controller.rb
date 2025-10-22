@@ -5,6 +5,12 @@ class OnboardingController < ApplicationController
   before_action :set_user_preference
 
   def show
+    # If user doesn't have a display name, redirect to signup first
+    if @user.display_name.blank? || @user.display_name == 'Demo User'
+      redirect_to signup_path
+      return
+    end
+    
     @step = params[:step]&.to_i || 1
     @total_steps = 6
     
