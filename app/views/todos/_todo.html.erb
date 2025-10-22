@@ -1,0 +1,37 @@
+<div id="<%= dom_id(todo) %>" class="todo-item <%= 'completed' if todo.completed %>">
+  <div class="todo-content">
+    <div class="todo-header">
+      <h3 class="todo-title"><%= todo.title %></h3>
+      <div class="todo-actions">
+        <%= link_to "Edit", edit_todo_path(todo), class: "btn btn-sm btn-secondary" %>
+        <%= link_to "Delete", todo_path(todo), method: :delete, 
+                    data: { confirm: "Are you sure?" }, 
+                    class: "btn btn-sm btn-danger" %>
+      </div>
+    </div>
+    <p class="todo-description"><%= todo.description %></p>
+    <div class="todo-meta">
+      <span class="todo-date">Created: <%= todo.created_at.strftime("%B %d, %Y at %I:%M %p") %></span>
+      <% if todo.completed %>
+        <span class="todo-status completed">✓ Completed</span>
+      <% else %>
+        <span class="todo-status pending">○ Pending</span>
+      <% end %>
+    </div>
+  </div>
+  
+  <div class="todo-toggle">
+    <%= link_to toggle_todo_path(todo), method: :patch, 
+                class: "toggle-btn #{'completed' if todo.completed}",
+                data: { turbo_method: :patch } do %>
+      <% if todo.completed %>
+        ✓
+      <% else %>
+        ○
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+
+

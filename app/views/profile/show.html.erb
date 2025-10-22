@@ -1,0 +1,199 @@
+<div class="profile-container">
+  <div class="profile-header">
+    <div class="profile-avatar">
+      <%= @user&.display_name&.first&.upcase || 'U' %>
+    </div>
+    <div class="profile-info">
+      <h1 class="profile-name"><%= @user&.display_name || 'Guest User' %></h1>
+      <p class="profile-subtitle">Member since <%= @user&.created_at&.strftime('%B %Y') || 'Unknown' %></p>
+    </div>
+  </div>
+
+  <div class="profile-stats">
+    <div class="stat-card">
+      <div class="stat-number"><%= @reviews_count %></div>
+      <div class="stat-label">Reviews</div>
+      <%= link_to "View All", my_reviews_path, class: "stat-link" if @reviews_count > 0 %>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-number"><%= @lists_count %></div>
+      <div class="stat-label">Lists</div>
+      <%= link_to "View All", lists_path, class: "stat-link" if @lists_count > 0 %>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-number"><%= @user&.user_preference&.preferred_genres&.count || 0 %></div>
+      <div class="stat-label">Favorite Genres</div>
+    </div>
+  </div>
+
+  <div class="profile-actions">
+    <%= link_to "Edit Preferences", onboarding_path, class: "btn btn--primary" %>
+    <%= link_to "My Recommendations", recommendations_path, class: "btn btn--secondary" %>
+    <%= link_to "My Lists", lists_path, class: "btn btn--secondary" %>
+    <%= link_to "My Reviews", my_reviews_path, class: "btn btn--secondary" %>
+  </div>
+</div>
+
+<style>
+.profile-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.profile-header {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  padding: 2rem;
+  background: var(--card-background);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.profile-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  font-weight: 600;
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-name {
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+  color: var(--text-primary);
+}
+
+.profile-subtitle {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: var(--card-background);
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.stat-number {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--accent-color);
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.stat-link {
+  display: inline-block;
+  margin-top: 0.5rem;
+  color: var(--accent-color);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.stat-link:hover {
+  text-decoration: underline;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: var(--accent-color);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #00cccc;
+}
+
+.btn--primary {
+  background: var(--accent-color);
+}
+
+.btn--primary:hover {
+  background: #00cccc;
+}
+
+.btn--secondary {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.btn--secondary:hover {
+  background: var(--background-secondary);
+}
+
+[data-theme="dark"] {
+  --bg-color: #1a1a1a;
+  --text-color: #ffffff;
+  --card-bg: #2d2d2d;
+  --border-color: #444;
+  --accent-color: #00ffff;
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --card-background: #2d2d2d;
+  --background-secondary: #3a3a3a;
+}
+
+[data-theme="light"] {
+  --bg-color: #f5f5f5;
+  --text-color: #333;
+  --card-bg: white;
+  --border-color: #ddd;
+  --accent-color: #00ffff;
+  --text-primary: #333;
+  --text-secondary: #666;
+  --card-background: white;
+  --background-secondary: #f8f9fa;
+}
+</style>
+

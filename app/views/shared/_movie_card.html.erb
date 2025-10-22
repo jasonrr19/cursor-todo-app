@@ -1,0 +1,112 @@
+<%# 
+  MovieCard Component - Reusable movie card with poster, details, rating, and actions
+  
+  Usage:
+    <%= render 'shared/movie_card', movie: @movie, show_actions: true, context: 'recommendations' %>
+  
+  Parameters:
+    - movie: Movie object (required)
+    - show_actions: Boolean to show/hide action buttons (default: true)
+    - context: String context for styling ('recommendations', 'serendipity', 'list', default: 'default')
+    - position: Integer position in list (optional, for list context)
+    - list_movie_id: Integer ID for list_movie association (optional, for list context)
+%><% 
+  show_actions = local_assigns.fetch(:show_actions, true)
+  context = local_assigns.fetch(:context, 'default')
+  position = local_assigns.fetch(:position, nil)
+  list_movie_id = local_assigns.fetch(:list_movie_id, nil)
+  
+  card_classes = ['movie-card']
+  card_classes << 'serendipity-card' if context == 'serendipity'
+  card_classes << 'sortable-item' if context == 'list'
+  
+  card_data = {}
+  card_data[:position] = position if position
+  card_data[:movie_id] = movie.id if context == 'list'
+  card_data[:list_movie_id] = list_movie_id if list_movie_id
+%>
+
+<div class="<%= card_classes.join(' ') %>" <%= card_data.map { |k, v| "data-#{k.to_s.dasherize}=\"#{v}\"" }.join(' ').html_safe %>>
+  <%# Poster %>
+  <% if movie.poster_path %>
+    <img src="<%= movie.poster_url %>" alt="<%= movie.title %>" class="movie-poster" loading="lazy">
+  <% else %>
+    <div class="movie-poster-placeholder">
+      <span>🎬</span>
+      <span class="placeholder-title"><%= truncate(movie.title, length: 20) %></span>
+    </div>
+  <% end %>
+
+  <%# Content %>
+  <div class="movie-content">
+    <h3 class="movie-title"><%= movie.title %></h3>
+    
+    <%# Release Year %>
+    <% if movie.release_date %>
+      <p class="movie-year"><%= movie.release_date.year %></p>
+    <% end %>
+
+    <%# Rating Badge %>
+    <% if movie.vote_average && movie.vote_average > 0 %>
+      <div class="movie-rating">
+        <span class="rating-star">⭐</span>
+        <span class="rating-value"><%= sprintf('%.1f', movie.vote_average) %></span>
+        <% if movie.vote_count && movie.vote_count > 0 %>
+          <span class="rating-count">(<%= number_to_human(movie.vote_count, precision: 0) %>)</span>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%# Genres (as tags) %>
+    <% if movie.genres.any? %>
+      <div class="movie-genres">
+        <% movie.genres.limit(3).each do |genre| %>
+          <span class="genre-tag"><%= genre.name %></span>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%# Overview (truncated) %>
+    <% if movie.overview.present? %>
+      <p class="movie-overview"><%= truncate(movie.overview, length: 120) %></p>
+    <% end %>
+
+    <%# Context-specific indicators %>
+    <% if context == 'serendipity' && movie.vote_count %>
+      <div class="vote-count">
+        <span class="vote-icon">🗳️</span>
+        <span><%= movie.vote_count %> votes</span>
+      </div>
+    <% end %>
+
+    <% if context == 'list' && position %>
+      <div class="movie-position-badge">#<%= position %></div>
+    <% end %>
+
+    <%# Actions %>
+    <% if show_actions %>
+      <div class="movie-actions">
+        <% if context == 'list' %>
+          <%# List context - Show remove button %>
+          <button class="btn btn--danger btn--small remove-movie"
+                  data-movie-id="<%= movie.id %>"
+                  data-list-id="<%= @list&.id %>"
+                  type="button">
+            Remove
+          </button>
+        <% else %>
+          <%# Default context - Show add to list and review buttons %>
+          <button class="btn btn--primary btn--small add-to-list"
+                  data-movie-id="<%= movie.id %>"
+                  onclick="showListPicker(<%= movie.id %>)"
+                  type="button">
+            Add to List
+          </button>
+          <%= link_to "Write Review", new_movie_review_path(movie), class: "btn btn--secondary btn--small" %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+

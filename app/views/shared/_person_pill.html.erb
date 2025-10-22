@@ -1,0 +1,65 @@
+<%# 
+  PersonPill Component - Reusable person badge/pill for directors, actors, crew
+  
+  Usage:
+    <%= render 'shared/person_pill', person: @person %>
+    <%= render 'shared/person_pill', person: @person, job: 'Director', size: 'large', show_avatar: true %>
+  
+  Parameters:
+    - person: Person object or Hash with :name and optional :profile_path (required)
+    - job: String job/role (e.g., 'Director', 'Actor') (optional)
+    - size: 'small' | 'medium' | 'large' (default: 'medium')
+    - show_avatar: Boolean to show profile picture (default: false)
+    - clickable: Boolean (default: false)
+    - url: String URL to link to (optional, requires clickable: true)
+    - removable: Boolean to show remove button (default: false)
+    - on_remove: String JavaScript function to call on remove (optional, requires removable: true)
+%><% 
+  person_name = person.is_a?(Hash) ? person[:name] : person.name
+  person_id = person.respond_to?(:id) ? person.id : (person.is_a?(Hash) ? person[:id] : nil)
+  profile_path = person.respond_to?(:profile_path) ? person.profile_path : (person.is_a?(Hash) ? person[:profile_path] : nil)
+  
+  job = local_assigns.fetch(:job, nil)
+  size = local_assigns.fetch(:size, 'medium')
+  show_avatar = local_assigns.fetch(:show_avatar, false)
+  clickable = local_assigns.fetch(:clickable, false)
+  url = local_assigns.fetch(:url, nil)
+  removable = local_assigns.fetch(:removable, false)
+  on_remove = local_assigns.fetch(:on_remove, nil)
+  
+  classes = ['person-pill', "person-pill--#{size}"]
+  classes << 'person-pill--clickable' if clickable
+  classes << 'person-pill--removable' if removable
+  
+  avatar_url = profile_path ? "https://image.tmdb.org/t/p/w45#{profile_path}" : nil
+%><% wrapper_tag = (clickable && url) ? :a : :span %>
+
+<%= content_tag wrapper_tag, class: classes.join(' '), href: (url if clickable && url), data: { person_id: person_id } do %>
+  <% if show_avatar %>
+    <% if avatar_url %>
+      <img src="<%= avatar_url %>" alt="<%= person_name %>" class="person-avatar" loading="lazy">
+    <% else %>
+      <span class="person-avatar-placeholder">
+        <%= person_name.first %>
+      </span>
+    <% end %>
+  <% end %>
+  
+  <span class="person-info">
+    <span class="person-name"><%= person_name %></span>
+    <% if job %>
+      <span class="person-job"><%= job %></span>
+    <% end %>
+  </span>
+  
+  <% if removable %>
+    <button type="button" 
+            class="person-remove-btn" 
+            <%= "onclick=\"#{on_remove}\"" if on_remove %>
+            aria-label="Remove <%= person_name %>">
+      ×
+    </button>
+  <% end %>
+<% end %>
+
+

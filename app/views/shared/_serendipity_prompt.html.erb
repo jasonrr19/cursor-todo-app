@@ -1,0 +1,49 @@
+<%# 
+  SerendipityPrompt Component - Inline prompt for serendipity discovery
+  
+  Usage:
+    <%= render 'shared/serendipity_prompt' %>
+    <%= render 'shared/serendipity_prompt', style: 'compact' %>
+  
+  Parameters:
+    - style: 'default' | 'compact' | 'banner' (default: 'default')
+    - show_examples: Boolean to show example text (default: true)
+%><% 
+  style = local_assigns.fetch(:style, 'default')
+  show_examples = local_assigns.fetch(:show_examples, true)
+  
+  classes = ['serendipity-prompt', "serendipity-prompt--#{style}"]
+%>
+
+<div class="<%= classes.join(' ') %>">
+  <div class="serendipity-prompt-icon">🎬</div>
+  
+  <div class="serendipity-prompt-content">
+    <h3 class="serendipity-prompt-title">
+      Feeling Adventurous?
+    </h3>
+    
+    <p class="serendipity-prompt-text">
+      Discover hidden gems and underrated films you might have missed.
+      <% if show_examples %>
+        <br>
+        <span class="serendipity-prompt-subtitle">
+          Perfect for finding obscure indie films, international cinema, and cult classics.
+        </span>
+      <% end %>
+    </p>
+    
+    <div class="serendipity-prompt-actions">
+      <%= link_to "Low-Vote Films", recommendations_serendipity_path(mode: 'low'), class: "btn btn--serendipity btn--small" %>
+      <%= link_to "Very Obscure", recommendations_serendipity_path(mode: 'obscure'), class: "btn btn--serendipity btn--small" %>
+    </div>
+    
+    <p class="serendipity-prompt-hint">
+      💡 <strong>Serendipity modes:</strong> 
+      <span class="hint-low">Low-Vote</span> finds films with fewer reviews, 
+      <span class="hint-obscure">Very Obscure</span> discovers the deepest cuts.
+    </p>
+  </div>
+</div>
+
+

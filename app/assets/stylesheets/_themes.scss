@@ -1,0 +1,81 @@
+// Cinema List Derby - Theme System
+
+// CSS Custom Properties for theming
+:root {
+  // Light theme (default)
+  --color-bg: #{$light-bg};
+  --color-surface: #{$light-surface};
+  --color-text: #{$light-text};
+  --color-text-secondary: #{$light-text-secondary};
+  --color-border: #{$light-border};
+  
+  // Neon accents
+  --color-neon-primary: #{$neon-cyan};
+  --color-neon-secondary: #{$neon-magenta};
+  --color-neon-accent: #{$neon-yellow};
+  
+  // Interactive states
+  --color-hover: #{$gray-100};
+  --color-active: #{$gray-200};
+  --color-focus: #{$neon-cyan};
+  
+  // Status colors
+  --color-success: #{$accent-green};
+  --color-warning: #{$neon-orange};
+  --color-error: #{$neon-pink};
+  --color-info: #{$neon-cyan};
+}
+
+// Dark theme
+[data-theme="dark"] {
+  --color-bg: #{$dark-bg};
+  --color-surface: #{$dark-surface};
+  --color-text: #{$dark-text};
+  --color-text-secondary: #{$dark-text-secondary};
+  --color-border: #{$dark-border};
+  
+  --color-hover: #{$gray-700};
+  --color-active: #{$gray-600};
+  --color-focus: #{$neon-cyan};
+}
+
+// System theme (follows OS preference)
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --color-bg: #{$dark-bg};
+    --color-surface: #{$dark-surface};
+    --color-text: #{$dark-text};
+    --color-text-secondary: #{$dark-text-secondary};
+    --color-border: #{$dark-border};
+    
+    --color-hover: #{$gray-700};
+    --color-active: #{$gray-600};
+    --color-focus: #{$neon-cyan};
+  }
+}
+
+// Theme utility classes
+.theme-light {
+  --color-bg: #{$light-bg};
+  --color-surface: #{$light-surface};
+  --color-text: #{$light-text};
+  --color-text-secondary: #{$light-text-secondary};
+  --color-border: #{$light-border};
+  --color-hover: #{$gray-100};
+  --color-active: #{$gray-200};
+}
+
+.theme-dark {
+  --color-bg: #{$dark-bg};
+  --color-surface: #{$dark-surface};
+  --color-text: #{$dark-text};
+  --color-text-secondary: #{$dark-text-secondary};
+  --color-border: #{$dark-border};
+  --color-hover: #{$gray-700};
+  --color-active: #{$gray-600};
+}
+
+
+
+
+

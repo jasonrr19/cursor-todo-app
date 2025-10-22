@@ -1,0 +1,121 @@
+<div class="home-hero">
+  <h1>🎬 Watched Movies</h1>
+  <p>Movies you've marked as watched</p>
+</div>
+
+<% if @watched_movies.any? %>
+  <div class="movie-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; padding: 20px;">
+    <% @watched_movies.each do |watched_movie| %>
+      <% movie = watched_movie.movie %>
+      <div class="movie-card" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
+        <div class="movie-poster" style="height: 300px; overflow: hidden;">
+          <% if movie.poster_path %>
+            <img src="https://image.tmdb.org/t/p/w300<%= movie.poster_path %>" 
+                 alt="<%= movie.title %>" 
+                 style="width: 100%; height: 100%; object-fit: cover;">
+          <% else %>
+            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">
+              No Image
+            </div>
+          <% end %>
+        </div>
+        
+        <div class="movie-info" style="padding: 15px;">
+          <h3 class="movie-title" style="margin: 0 0 10px 0; font-size: 16px;"><%= movie.title %></h3>
+          <p class="movie-year" style="margin: 5px 0; color: #666; font-size: 14px;">
+            <%= movie.release_date ? movie.release_date.year : 'N/A' %>
+          </p>
+          <p class="movie-rating" style="margin: 5px 0; font-size: 14px;">
+            ⭐ <%= movie.vote_average.round(1) %> (<%= movie.vote_count %> votes)
+          </p>
+          <p class="watched-date" style="margin: 10px 0; color: var(--accent-color); font-size: 12px;">
+            Watched <%= time_ago_in_words(watched_movie.watched_at) %> ago
+          </p>
+          
+          <div class="movie-actions" style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn btn--ghost btn--small" 
+                    onclick="toggleWatched(<%= movie.id %>, false)"
+                    style="background: transparent; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 4px; cursor: pointer;">
+              ❌ Unmark
+            </button>
+            <button class="btn btn--primary btn--small" 
+                    onclick="viewDetails(<%= movie.id %>)"
+                    style="background: var(--accent-color); color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">
+              👁️ Details
+            </button>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <% if logged_in? %>
+    <%= render 'shared/empty_state',
+        icon: '👁️',
+        title: 'No Watched Movies Yet',
+        message: 'Search for movies and mark them as watched to track your viewing history!',
+        action_text: 'Browse Movies',
+        action_path: root_path %>
+  <% else %>
+    <%= render 'shared/empty_state',
+        icon: '👁️',
+        title: 'No Watched Movies Yet',
+        message: 'Sign up to track your watched movies and get personalized recommendations!',
+        action_text: 'Get Started',
+        action_path: signup_path %>
+  <% end %>
+<% end %>
+
+<script>
+  async function toggleWatched(movieId, watched) {
+    const method = watched ? 'POST' : 'DELETE';
+    const url = watched ? '/watched_movies' : `/watched_movies/${movieId}`;
+    
+    try {
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({ movie_id: movieId })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        showNotification(data.message);
+        // Reload the page to update the list
+        setTimeout(() => window.location.reload(), 500);
+      } else {
+        showNotification(data.error || 'Failed to update watched status', 'error');
+      }
+    } catch (error) {
+      console.error('Error updating watched status:', error);
+      showNotification('Failed to update watched status', 'error');
+    }
+  }
+  
+  function showNotification(message, type = 'success') {
+    const notification = document.createElement('div');
+    notification.textContent = message;
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${type === 'success' ? 'var(--accent-color)' : '#ff6b6b'};
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      z-index: 10000;
+      animation: slideIn 0.3s ease;
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      notification.style.animation = 'slideOut 0.3s ease';
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+  }
+</script>
+

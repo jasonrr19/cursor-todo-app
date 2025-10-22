@@ -1,0 +1,149 @@
+// Cinema List Derby - Base Styles
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  line-height: $line-height-normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: $font-family-sans;
+  font-size: $font-size-base;
+  font-weight: $font-weight-normal;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  transition: background-color $transition-normal, color $transition-normal;
+}
+
+// Typography
+h1, h2, h3, h4, h5, h6 {
+  font-weight: $font-weight-bold;
+  line-height: $line-height-tight;
+  margin: 0 0 $spacing-4 0;
+  color: var(--color-text);
+}
+
+h1 { font-size: $font-size-4xl; }
+h2 { font-size: $font-size-3xl; }
+h3 { font-size: $font-size-2xl; }
+h4 { font-size: $font-size-xl; }
+h5 { font-size: $font-size-lg; }
+h6 { font-size: $font-size-base; }
+
+p {
+  margin: 0 0 $spacing-4 0;
+  color: var(--color-text-secondary);
+  line-height: $line-height-relaxed;
+}
+
+a {
+  color: var(--color-neon-primary);
+  text-decoration: none;
+  transition: color $transition-fast;
+  
+  &:hover {
+    color: var(--color-neon-secondary);
+  }
+  
+  &:focus {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+}
+
+// Lists
+ul, ol {
+  margin: 0 0 $spacing-4 0;
+  padding-left: $spacing-6;
+}
+
+li {
+  margin-bottom: $spacing-2;
+}
+
+// Code
+code, pre {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+}
+
+code {
+  background-color: var(--color-surface);
+  padding: $spacing-1 $spacing-2;
+  border-radius: $border-radius-sm;
+  color: var(--color-neon-accent);
+}
+
+pre {
+  background-color: var(--color-surface);
+  padding: $spacing-4;
+  border-radius: $border-radius;
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+}
+
+// Images
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+// Form elements
+input, textarea, select, button {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+// Focus styles
+*:focus {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+// Selection
+::selection {
+  background-color: var(--color-neon-primary);
+  color: var(--color-bg);
+}
+
+// Scrollbar (Webkit)
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: $border-radius-full;
+  
+  &:hover {
+    background: var(--color-text-secondary);
+  }
+}
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+
+
+
+

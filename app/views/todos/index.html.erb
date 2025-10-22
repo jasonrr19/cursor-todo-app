@@ -1,0 +1,22 @@
+<div class="todos-container">
+  <div class="todo-form-section">
+    <h2>Add New Todo</h2>
+    <%= render "form", todo: @todo %>
+  </div>
+
+  <div class="todos-list-section">
+    <h2>Your Todos</h2>
+    <div id="todos-list" class="todos-list">
+      <% if @todos.any? %>
+        <%= render @todos %>
+      <% else %>
+        <div class="empty-state">
+          <p>No todos yet. Add one above to get started!</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+
+

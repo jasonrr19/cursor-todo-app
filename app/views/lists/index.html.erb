@@ -1,0 +1,326 @@
+<div class="lists-container">
+  <div class="lists-header">
+    <div class="lists-header-text">
+      <h1>My Lists</h1>
+      <p class="lists-subtitle">Organize your favorite movies into custom lists</p>
+    </div>
+    <%= link_to new_list_path, class: "btn btn--create-list" do %>
+      <span class="btn-icon">➕</span>
+      <span class="btn-text">Create New List</span>
+    <% end %>
+  </div>
+
+  <% if @lists.any? %>
+    <div class="lists-grid">
+      <% @lists.each do |list| %>
+        <div class="list-card">
+          <div class="list-header">
+            <h3 class="list-title"><%= list.name %></h3>
+            <div class="list-privacy">
+              <% case list.privacy_level %>
+              <% when 'private' %>
+                <span class="privacy-badge private">🔒 Private</span>
+              <% when 'unlisted' %>
+                <span class="privacy-badge unlisted">🔗 Unlisted</span>
+              <% when 'public' %>
+                <span class="privacy-badge public">🌐 Public</span>
+              <% end %>
+            </div>
+          </div>
+          
+          <% if list.description.present? %>
+            <p class="list-description"><%= list.description %></p>
+          <% end %>
+          
+          <div class="list-stats">
+            <span class="movie-count"><%= list.movies.count %> movies</span>
+            <span class="list-created">Created <%= time_ago_in_words(list.created_at) %> ago</span>
+          </div>
+          
+          <div class="list-actions">
+            <%= link_to "View", list_path(list), class: "btn btn--primary btn--small" %>
+            <%= link_to "Edit", edit_list_path(list), class: "btn btn--ghost btn--small" %>
+            <%= link_to "Delete", list_path(list), method: :delete, 
+                        data: { confirm: "Are you sure?" }, 
+                        class: "btn btn--danger btn--small" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <%= render 'shared/empty_state',
+        icon: '📋',
+        title: 'No lists yet',
+        message: 'Create your first list to start organizing your favorite movies!',
+        action_text: 'Create Your First List',
+        action_path: new_list_path %>
+  <% end %>
+</div>
+
+<style>
+.lists-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.lists-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.lists-header-text h1 {
+  font-size: 2.5rem;
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+}
+
+.lists-subtitle {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.btn--create-list {
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+  color: white;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 4px 15px rgba(0, 255, 255, 0.3);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn--create-list::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn--create-list:hover::before {
+  left: 100%;
+}
+
+.btn--create-list:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 25px rgba(0, 255, 255, 0.5);
+}
+
+.btn--create-list .btn-icon {
+  font-size: 1.3rem;
+  animation: pulse-icon 2s ease-in-out infinite;
+}
+
+@keyframes pulse-icon {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.btn--create-list .btn-text {
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.lists-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 2rem;
+}
+
+.list-card {
+  background: var(--card-background);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid var(--border-color);
+}
+
+.list-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.list-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  flex: 1;
+}
+
+.privacy-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.privacy-badge.private {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.privacy-badge.unlisted {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.privacy-badge.public {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.list-description {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.list-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.movie-count {
+  font-weight: 500;
+}
+
+.list-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.no-lists {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: var(--card-background);
+  border-radius: 12px;
+  border: 2px dashed var(--border-color);
+}
+
+.no-lists h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.no-lists p {
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: var(--accent-primary);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: var(--accent-secondary);
+}
+
+.btn--primary {
+  background: var(--accent-primary);
+}
+
+.btn--primary:hover {
+  background: var(--accent-secondary);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.btn--ghost:hover {
+  background: var(--background-secondary);
+}
+
+.btn--danger {
+  background: #dc2626;
+}
+
+.btn--danger:hover {
+  background: #b91c1c;
+}
+
+.btn--large {
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+}
+
+.btn--small {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+[data-theme="dark"] {
+  --bg-color: #1a1a1a;
+  --text-color: #ffffff;
+  --card-bg: #2d2d2d;
+  --border-color: #444;
+  --accent-color: #00ffff;
+  --accent-primary: #00ffff;
+  --accent-secondary: #00cccc;
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --card-background: #2d2d2d;
+  --background-secondary: #3a3a3a;
+}
+
+[data-theme="light"] {
+  --bg-color: #f5f5f5;
+  --text-color: #333;
+  --card-bg: white;
+  --border-color: #ddd;
+  --accent-color: #00ffff;
+  --accent-primary: #00ffff;
+  --accent-secondary: #00cccc;
+  --text-primary: #333;
+  --text-secondary: #666;
+  --card-background: white;
+  --background-secondary: #f8f9fa;
+}
+</style>
+
+

@@ -1,0 +1,412 @@
+<div class="reviews-container">
+  <div class="reviews-header">
+    <h1>My Reviews</h1>
+    <p class="reviews-subtitle">Your movie reviews and ratings</p>
+  </div>
+
+  <% if @reviews.any? %>
+    <div class="reviews-grid">
+      <% @reviews.each do |review| %>
+        <div class="review-card">
+          <div class="review-movie">
+            <% if review.movie.poster_path %>
+              <img src="<%= review.movie.poster_url %>" alt="<%= review.movie.title %>" class="movie-poster">
+            <% else %>
+              <div class="movie-poster-placeholder">
+                <span><%= review.movie.title %></span>
+              </div>
+            <% end %>
+            
+            <div class="movie-info">
+              <h3 class="movie-title"><%= review.movie.title %></h3>
+              <p class="movie-year"><%= review.movie.release_date&.year %></p>
+            </div>
+          </div>
+
+          <div class="review-content">
+            <div class="review-header">
+              <div class="review-rating">
+                <span class="rating-value"><%= review.rating %></span>
+                <span class="rating-label">/10</span>
+              </div>
+              <div class="review-meta">
+                <span class="review-date">
+                  <%= review.created_at.strftime("%B %d, %Y") %>
+                  <% if review.updated_at > review.created_at %>
+                    <span class="edited-badge">✏️ Edited</span>
+                  <% end %>
+                </span>
+                <% if review.title.present? %>
+                  <h4 class="review-title"><%= review.title %></h4>
+                <% end %>
+              </div>
+            </div>
+
+            <div class="review-text">
+              <% if review.contains_spoilers %>
+                <div class="spoiler-warning">
+                  <span class="spoiler-icon">⚠️</span>
+                  <span class="spoiler-text">Contains Spoilers</span>
+                </div>
+                <div class="spoiler-content" data-spoiler="true">
+                  <div class="spoiler-blur">
+                    <p><%= truncate(review.review_text, length: 200) %></p>
+                    <button class="spoiler-reveal-btn" onclick="toggleSpoiler(this)">Click to reveal spoilers</button>
+                  </div>
+                  <div class="spoiler-revealed" style="display: none;">
+                    <p><%= simple_format(review.review_text) %></p>
+                    <button class="spoiler-hide-btn" onclick="toggleSpoiler(this)">Hide spoilers</button>
+                  </div>
+                </div>
+              <% else %>
+                <p><%= simple_format(review.review_text) %></p>
+              <% end %>
+            </div>
+
+            <div class="review-actions">
+              <%= link_to "Edit", edit_review_path(review), class: "btn btn--primary btn--small" %>
+              <%= link_to "View Movie", movie_path(review.movie), class: "btn btn--ghost btn--small" %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <%= render 'shared/empty_state',
+        icon: '✍️',
+        title: 'No reviews yet',
+        message: 'Start reviewing movies to see them here!',
+        action_text: 'Browse Movies',
+        action_path: root_path %>
+  <% end %>
+</div>
+
+<style>
+.reviews-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.reviews-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.reviews-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.reviews-subtitle {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.reviews-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.review-card {
+  background: var(--card-background);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid var(--border-color);
+}
+
+.review-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.review-movie {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.movie-poster {
+  width: 80px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.movie-poster-placeholder {
+  width: 80px;
+  height: 120px;
+  background: var(--background-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 0.5rem;
+  border-radius: 8px;
+}
+
+.movie-info {
+  flex: 1;
+}
+
+.movie-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.movie-year {
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.review-content {
+  padding: 1.5rem;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.review-rating {
+  display: flex;
+  align-items: baseline;
+  background: var(--accent-primary);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.rating-value {
+  font-size: 1.5rem;
+}
+
+.rating-label {
+  font-size: 1rem;
+  margin-left: 0.25rem;
+}
+
+.review-meta {
+  flex: 1;
+  text-align: right;
+}
+
+.review-date {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.edited-badge {
+  color: var(--accent-primary);
+  font-weight: 500;
+  margin-left: 0.5rem;
+}
+
+.review-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.review-text {
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.spoiler-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fef3c7;
+  color: #d97706;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.spoiler-content {
+  position: relative;
+}
+
+.spoiler-blur {
+  filter: blur(5px);
+  user-select: none;
+  pointer-events: none;
+  position: relative;
+}
+
+.spoiler-reveal-btn,
+.spoiler-hide-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--accent-primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  z-index: 10;
+}
+
+.spoiler-revealed {
+  position: relative;
+}
+
+.spoiler-hide-btn {
+  position: static;
+  transform: none;
+  margin-top: 1rem;
+}
+
+.review-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.no-reviews {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: var(--card-background);
+  border-radius: 12px;
+  border: 2px dashed var(--border-color);
+}
+
+.no-reviews h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.no-reviews p {
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: var(--accent-primary);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: var(--accent-secondary);
+}
+
+.btn--primary {
+  background: var(--accent-primary);
+}
+
+.btn--primary:hover {
+  background: var(--accent-secondary);
+}
+
+.btn--secondary {
+  background: var(--background-secondary);
+  color: var(--text-primary);
+  border: 2px solid var(--accent-primary);
+}
+
+.btn--secondary:hover {
+  background: var(--accent-primary);
+  color: white;
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.btn--ghost:hover {
+  background: var(--background-secondary);
+}
+
+.btn--small {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+[data-theme="dark"] {
+  --bg-color: #1a1a1a;
+  --text-color: #ffffff;
+  --card-bg: #2d2d2d;
+  --border-color: #444;
+  --accent-color: #00ffff;
+  --accent-primary: #00ffff;
+  --accent-secondary: #00cccc;
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --card-background: #2d2d2d;
+  --background-secondary: #3a3a3a;
+}
+
+[data-theme="light"] {
+  --bg-color: #f5f5f5;
+  --text-color: #333;
+  --card-bg: white;
+  --border-color: #ddd;
+  --accent-color: #00ffff;
+  --accent-primary: #00ffff;
+  --accent-secondary: #00cccc;
+  --text-primary: #333;
+  --text-secondary: #666;
+  --card-background: white;
+  --background-secondary: #f8f9fa;
+}
+</style>
+
+<script>
+function toggleSpoiler(button) {
+  const spoilerContent = button.closest('.spoiler-content');
+  const blurDiv = spoilerContent.querySelector('.spoiler-blur');
+  const revealedDiv = spoilerContent.querySelector('.spoiler-revealed');
+  
+  if (blurDiv.style.display !== 'none') {
+    blurDiv.style.display = 'none';
+    revealedDiv.style.display = 'block';
+  } else {
+    blurDiv.style.display = 'block';
+    revealedDiv.style.display = 'none';
+  }
+}
+</script>
+
+

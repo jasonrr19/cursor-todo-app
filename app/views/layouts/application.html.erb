@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="system">
+  <head>
+    <title><%= Rails.application.config.app_name %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="Discover and organize your movie watchlist with personalized recommendations">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body>
+    <div class="container">
+      <header class="header">
+        <div class="header__content">
+          <a href="/" class="header__logo">
+            <%= Rails.application.config.app_name %>
+          </a>
+          
+          <nav class="header__nav">
+            <a href="/" class="btn btn--ghost">Home</a>
+            <a href="/lists" class="btn btn--ghost">My Lists</a>
+            <a href="/recommendations" class="btn btn--ghost">Discover</a>
+          </nav>
+          
+          <div class="header__actions">
+            <button class="theme-toggle" data-action="click->theme#toggle" title="Toggle theme">
+              <span class="theme-icon">🌙</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="main">
+        <%= yield %>
+      </main>
+
+      <footer class="footer">
+        <div class="footer__content">
+          <p class="footer__text">
+            &copy; 2024 <%= Rails.application.config.app_name %>. 
+            Built with Ruby on Rails, Stimulus, and SCSS.
+          </p>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+
+
+

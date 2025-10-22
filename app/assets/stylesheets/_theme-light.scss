@@ -1,0 +1,39 @@
+// Cinema List Derby - Light Theme Specific Styles
+
+[data-theme="light"],
+.theme-light {
+  // Override any light theme specific styles here
+  // Most styles are handled by CSS custom properties in _themes.scss
+  
+  .card {
+    box-shadow: $shadow;
+    
+    &:hover {
+      box-shadow: $shadow-lg;
+    }
+  }
+  
+  .btn--primary {
+    background: linear-gradient(135deg, $neon-cyan, $neon-magenta);
+    color: $white;
+    
+    &:hover:not(:disabled) {
+      box-shadow: 0 0 20px $neon-cyan, 0 0 40px $neon-cyan;
+    }
+  }
+  
+  .form-input:focus,
+  .form-textarea:focus,
+  .form-select:focus {
+    box-shadow: 0 0 0 3px rgba(0, 255, 255, 0.2);
+  }
+  
+  .theme-toggle:hover {
+    box-shadow: 0 0 10px $neon-cyan, 0 0 20px $neon-cyan;
+  }
+}
+
+
+
+
+

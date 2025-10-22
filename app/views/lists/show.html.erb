@@ -1,0 +1,374 @@
+<div class="list-detail-container">
+  <div class="list-header">
+    <div class="list-info">
+      <h1 class="list-title"><%= @list.name %></h1>
+      <% if @list.description.present? %>
+        <p class="list-description"><%= @list.description %></p>
+      <% end %>
+      <div class="list-meta">
+        <span class="privacy-badge <%= @list.privacy_level %>">
+          <% case @list.privacy_level %>
+          <% when 'private' %>
+            🔒 Private
+          <% when 'unlisted' %>
+            🔗 Unlisted
+          <% when 'public' %>
+            🌐 Public
+          <% end %>
+        </span>
+        <span class="movie-count"><%= @movies.count %> movies</span>
+        <span class="list-created">Created <%= time_ago_in_words(@list.created_at) %> ago</span>
+      </div>
+    </div>
+    
+    <div class="list-actions">
+      <%= link_to "Edit List", edit_list_path(@list), class: "btn btn--primary" %>
+      <button onclick="showSharingModal()" class="btn btn--secondary">Share List</button>
+      <%= link_to "Back to Lists", lists_path, class: "btn btn--ghost" %>
+    </div>
+  </div>
+
+  <% if @movies.any? %>
+    <div class="movies-grid" id="sortable-movies">
+      <% @movies.each_with_index do |movie, index| %>
+        <div class="movie-card sortable-item" data-position="<%= index + 1 %>" data-movie-id="<%= movie.id %>" data-list-movie-id="<%= movie.list_movies.find_by(list: @list).id %>">
+          <% if movie.poster_path %>
+            <img src="<%= movie.poster_url %>" alt="<%= movie.title %>" class="movie-poster">
+          <% else %>
+            <div class="movie-poster-placeholder">
+              <span><%= movie.title %></span>
+            </div>
+          <% end %>
+          
+          <div class="movie-info">
+            <div class="movie-position">#<%= index + 1 %></div>
+            <h3 class="movie-title"><%= movie.title %></h3>
+            <p class="movie-year"><%= movie.release_date&.year %></p>
+            <div class="movie-rating">
+              <span class="rating-value"><%= movie.vote_average.round(1) %></span>
+              <span class="rating-label">/10</span>
+            </div>
+            <div class="movie-genres">
+              <% movie.genres.limit(3).each do |genre| %>
+                <span class="genre-tag"><%= genre.name %></span>
+              <% end %>
+            </div>
+            <% if movie.overview.present? %>
+              <p class="movie-overview"><%= truncate(movie.overview, length: 120) %></p>
+            <% end %>
+          </div>
+          
+          <div class="movie-actions">
+            <button class="btn btn--danger btn--small remove-movie" 
+                    data-movie-id="<%= movie.id %>"
+                    data-list-id="<%= @list.id %>">
+              Remove
+            </button>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="empty-list">
+      <h3>This list is empty</h3>
+      <p>Add movies to this list to get started!</p>
+      <%= link_to "Browse Movies", root_path, class: "btn btn--primary" %>
+    </div>
+  <% end %>
+</div>
+
+<style>
+.list-detail-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.list-info {
+  flex: 1;
+}
+
+.list-title {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.list-description {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.list-meta {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.privacy-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.privacy-badge.private {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.privacy-badge.unlisted {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.privacy-badge.public {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.movie-count,
+.list-created {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.list-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.movies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.movie-card {
+  background: var(--card-background);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  cursor: move;
+}
+
+.sortable-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.sortable-item.dragging {
+  opacity: 0.5;
+  transform: rotate(5deg);
+}
+
+.movie-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.movie-poster {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+}
+
+.movie-poster-placeholder {
+  width: 100%;
+  height: 400px;
+  background: var(--background-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  text-align: center;
+  padding: 1rem;
+}
+
+.movie-info {
+  padding: 1.5rem;
+}
+
+.movie-position {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: var(--accent-primary);
+  color: white;
+  padding: 0.5rem;
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.movie-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.movie-year {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.movie-rating {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 1rem;
+}
+
+.rating-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+}
+
+.rating-label {
+  color: var(--text-secondary);
+  margin-left: 0.25rem;
+}
+
+.movie-genres {
+  margin-bottom: 1rem;
+}
+
+.genre-tag {
+  display: inline-block;
+  background: var(--accent-primary);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.movie-overview {
+  color: var(--text-secondary);
+  line-height: 1.5;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+
+.movie-actions {
+  padding: 0 1.5rem 1.5rem;
+}
+
+.empty-list {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: var(--card-background);
+  border-radius: 12px;
+  border: 2px dashed var(--border-color);
+}
+
+.empty-list h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.empty-list p {
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: var(--accent-primary);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: var(--accent-secondary);
+}
+
+.btn--primary {
+  background: var(--accent-primary);
+}
+
+.btn--primary:hover {
+  background: var(--accent-secondary);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.btn--ghost:hover {
+  background: var(--background-secondary);
+}
+
+.btn--danger {
+  background: #dc2626;
+}
+
+.btn--danger:hover {
+  background: #b91c1c;
+}
+
+.btn--small {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+[data-theme="dark"] {
+  --bg-color: #1a1a1a;
+  --text-color: #ffffff;
+  --card-bg: #2d2d2d;
+  --border-color: #444;
+  --accent-color: #00ffff;
+  --accent-primary: #00ffff;
+  --accent-secondary: #00cccc;
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --card-background: #2d2d2d;
+  --background-secondary: #3a3a3a;
+}
+
+[data-theme="light"] {
+  --bg-color: #f5f5f5;
+  --text-color: #333;
+  --card-bg: white;
+  --border-color: #ddd;
+  --accent-color: #00ffff;
+  --accent-primary: #00ffff;
+  --accent-secondary: #00cccc;
+  --text-primary: #333;
+  --text-secondary: #666;
+  --card-background: white;
+  --background-secondary: #f8f9fa;
+}
+</style>

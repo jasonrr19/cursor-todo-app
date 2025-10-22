@@ -1,0 +1,65 @@
+# Cinema List Derby - RuboCop Configuration
+
+AllCops:
+  NewCops: enable
+  SuggestExtensions: false
+  TargetRubyVersion: 3.2
+  Exclude:
+    - 'db/schema.rb'
+    - 'db/migrate/*'
+    - 'bin/*'
+    - 'config/boot.rb'
+    - 'config/environment.rb'
+    - 'config.ru'
+    - 'Rakefile'
+    - 'Gemfile.lock'
+    - 'node_modules/**/*'
+    - 'vendor/**/*'
+
+# Style
+Style/FrozenStringLiteralComment:
+  Enabled: true
+  EnforcedStyle: always
+
+Style/StringLiterals:
+  EnforcedStyle: single_quotes
+
+Style/Documentation:
+  Enabled: false
+
+Style/EmptyMethod:
+  EnforcedStyle: expanded
+
+# Layout
+Layout/LineLength:
+  Max: 120
+  Exclude:
+    - 'config/importmap.rb'
+
+Layout/EmptyLines:
+  Enabled: true
+
+# Metrics
+Metrics/MethodLength:
+  Max: 15
+
+Metrics/AbcSize:
+  Max: 20
+
+Metrics/ClassLength:
+  Max: 150
+
+# Bundler
+Bundler/OrderedGems:
+  Enabled: true
+
+# Rails
+plugins:
+  - rubocop-rails
+
+# Disable some cops that are too strict for our use case
+Style/SymbolArray:
+  Enabled: false
+
+Style/PercentLiteralDelimiters:
+  Enabled: false

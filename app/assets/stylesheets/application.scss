@@ -1,0 +1,13 @@
+// Cinema List Derby - Main Stylesheet
+// Import base variables first
+@import 'variables';
+@import 'themes';
+
+// Base styles
+@import 'base';
+@import 'components';
+@import 'layout';
+
+// Theme-specific styles
+@import 'theme-light';
+@import 'theme-dark';

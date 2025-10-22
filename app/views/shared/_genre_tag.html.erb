@@ -1,0 +1,32 @@
+<%# 
+  GenreTag Component - Reusable genre badge/tag
+  
+  Usage:
+    <%= render 'shared/genre_tag', genre: @genre %>
+    <%= render 'shared/genre_tag', genre: @genre, size: 'large', clickable: true %>
+  
+  Parameters:
+    - genre: Genre object or String (required)
+    - size: 'small' | 'medium' | 'large' (default: 'medium')
+    - clickable: Boolean (default: false)
+    - url: String URL to link to (optional, requires clickable: true)
+%><% 
+  genre_name = genre.is_a?(String) ? genre : genre.name
+  genre_id = genre.respond_to?(:id) ? genre.id : nil
+  size = local_assigns.fetch(:size, 'medium')
+  clickable = local_assigns.fetch(:clickable, false)
+  url = local_assigns.fetch(:url, nil)
+  
+  classes = ['genre-tag', "genre-tag--#{size}"]
+  classes << 'genre-tag--clickable' if clickable
+%>
+
+<% if clickable && url %>
+  <%= link_to genre_name, url, class: classes.join(' '), data: { genre_id: genre_id } %>
+<% else %>
+  <span class="<%= classes.join(' ') %>" <%= "data-genre-id=\"#{genre_id}\"" if genre_id %>>
+    <%= genre_name %>
+  </span>
+<% end %>
+
+

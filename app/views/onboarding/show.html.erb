@@ -1,0 +1,204 @@
+<div class="onboarding-container">
+  <div class="onboarding-card">
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+      <div class="progress-fill" style="width: <%= (@step.to_f / @total_steps * 100).round %>%"></div>
+    </div>
+    
+    <div class="progress-text">
+      Step <%= @step %> of <%= @total_steps %>
+    </div>
+
+    <!-- Step Content -->
+    <% case @step %>
+    <% when 1 %>
+      <!-- Step 1: Select Genres -->
+      <h1>What genres do you enjoy?</h1>
+      <p class="step-subtitle">Select up to 3 genres (you can change this later)</p>
+      
+      <%= form_with url: onboarding_path, method: :patch, local: true, class: "onboarding-form" do |form| %>
+        <%= form.hidden_field :step, value: @step %>
+        
+        <div class="selection-grid">
+          <% @genres.each do |genre| %>
+            <label class="selection-item">
+              <%= form.check_box "genre_ids[]", 
+                  { checked: @user_preference.preferred_genres&.include?(genre.tmdb_id.to_s), 
+                    onchange: "limitGenres(this)" }, 
+                  genre.tmdb_id, 
+                  "" %>
+              <span class="selection-label"><%= genre.name %></span>
+            </label>
+          <% end %>
+        </div>
+        
+        <div class="form-actions">
+          <%= form.submit "Continue", class: "btn btn--primary btn--large" %>
+        </div>
+      <% end %>
+
+    <% when 2 %>
+      <!-- Step 2: Select Language -->
+      <h1>What language do you prefer for movies?</h1>
+      <p class="step-subtitle">Choose the main language you prefer when watching movies (this affects movie recommendations, not the website language)</p>
+      
+      <%= form_with url: onboarding_path, method: :patch, local: true, class: "onboarding-form" do |form| %>
+        <%= form.hidden_field :step, value: @step %>
+        
+        <div class="selection-list">
+          <% @languages.each do |language| %>
+            <label class="selection-item">
+              <%= form.radio_button :language_code, language.iso_639_1, 
+                  { checked: @user_preference.preferred_languages&.include?(language.iso_639_1) } %>
+              <span class="selection-label"><%= language.name %></span>
+            </label>
+          <% end %>
+        </div>
+        
+        <div class="form-actions">
+          <%= form.submit "Continue", class: "btn btn--primary btn--large" %>
+        </div>
+      <% end %>
+
+    <% when 3 %>
+      <!-- Step 3: Select Country -->
+      <h1>What countries' films interest you?</h1>
+      <p class="step-subtitle">Select up to 3 countries whose films you enjoy (you can change this later)</p>
+      
+      <%= form_with url: onboarding_path, method: :patch, local: true, class: "onboarding-form" do |form| %>
+        <%= form.hidden_field :step, value: @step %>
+        
+        <div class="selection-grid">
+          <% @countries.each do |country| %>
+            <label class="selection-item">
+              <%= form.check_box "country_codes[]", 
+                  { checked: @user_preference.preferred_countries&.include?(country.iso_3166_1), 
+                    onchange: "limitCountries(this)" }, 
+                  country.iso_3166_1, 
+                  "" %>
+              <span class="selection-label"><%= country.name %></span>
+            </label>
+          <% end %>
+        </div>
+        
+        <div class="form-actions">
+          <%= form.submit "Continue", class: "btn btn--primary btn--large" %>
+        </div>
+      <% end %>
+
+    <% when 4 %>
+      <!-- Step 4: Select Decades -->
+      <h1>What decades interest you?</h1>
+      <p class="step-subtitle">Select up to 3 decades you're most interested in (you can change this later)</p>
+      
+      <%= form_with url: onboarding_path, method: :patch, local: true, class: "onboarding-form" do |form| %>
+        <%= form.hidden_field :step, value: @step %>
+        
+        <div class="selection-grid">
+          <% @decades.each do |decade| %>
+            <label class="selection-item">
+              <%= form.check_box "decades[]", 
+                  { checked: @user_preference.preferred_decades&.include?(decade[:value]), 
+                    onchange: "limitDecades(this)" }, 
+                  decade[:value], 
+                  "" %>
+              <span class="selection-label"><%= decade[:label] %></span>
+            </label>
+          <% end %>
+        </div>
+        
+        <div class="form-actions">
+          <%= form.submit "Continue", class: "btn btn--primary btn--large" %>
+        </div>
+      <% end %>
+
+    <% when 5 %>
+      <!-- Step 5: Search for People -->
+      <h1>Any favorite directors or actors?</h1>
+      <p class="step-subtitle">This step is optional. Search for and select people whose work you enjoy. Discover as many as you'd like!</p>
+      
+      <%= form_with url: onboarding_path, method: :patch, local: true, class: "onboarding-form", id: "people-form" do |form| %>
+        <%= form.hidden_field :step, value: @step %>
+        <input type="hidden" name="person_tmdb_ids" id="person_tmdb_ids" value="">
+        
+        <div class="people-search-container">
+          <div class="search-input-group">
+            <input type="text" id="people-search-input" placeholder="Search for directors, actors, or other film people..." class="form-input">
+            <button type="button" id="search-people-btn" class="btn btn--primary">Search</button>
+          </div>
+          
+          <div id="people-search-results" class="people-results" style="display: none;">
+            <!-- Search results will be populated here -->
+          </div>
+          
+          <div id="selected-people" class="selected-people">
+            <h4>Selected People:</h4>
+            <div id="selected-people-list">
+              <!-- Selected people will be shown here -->
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-actions">
+          <%= form.submit "Continue", class: "btn btn--primary btn--large" %>
+        </div>
+      <% end %>
+
+    <% when 6 %>
+      <!-- Step 6: Summary -->
+      <h1>All set!</h1>
+      <p class="step-subtitle">Your preferences have been saved. Let's start discovering movies!</p>
+      
+      <div class="summary-card">
+        <h3>Your Preferences:</h3>
+        <ul>
+          <li><strong>Genres:</strong> 
+            <% if @user_preference.preferred_genres&.reject(&:blank?)&.any? %>
+              <% genre_names = Genre.where(tmdb_id: @user_preference.preferred_genres.reject(&:blank?)).pluck(:name) %>
+              <%= genre_names.join(', ') %>
+            <% else %>
+              None selected
+            <% end %>
+          </li>
+          <li><strong>Language:</strong> 
+            <% if @user_preference.preferred_languages&.reject(&:blank?)&.any? %>
+              <%= OriginalLanguage.find_by(iso_639_1: @user_preference.preferred_languages.first)&.name || 'Unknown' %>
+            <% else %>
+              Not selected
+            <% end %>
+          </li>
+          <li><strong>Countries:</strong> 
+            <% if @user_preference.preferred_countries&.reject(&:blank?)&.any? %>
+              <% country_names = ProductionCountry.where(iso_3166_1: @user_preference.preferred_countries).pluck(:name) %>
+              <%= country_names.join(', ') %>
+            <% else %>
+              None selected
+            <% end %>
+          </li>
+          <li><strong>Decades:</strong> 
+            <% if @user_preference.preferred_decades&.reject(&:blank?)&.any? %>
+              <%= @user_preference.preferred_decades.join(', ') %>
+            <% else %>
+              None selected
+            <% end %>
+          </li>
+          <li><strong>People:</strong> 
+            <% if @user_preference.preferred_people&.reject(&:blank?)&.any? %>
+              <% person_names = Person.where(id: @user_preference.preferred_people.reject(&:blank?)).pluck(:name) %>
+              <%= person_names.join(', ') %>
+            <% else %>
+              None selected
+            <% end %>
+          </li>
+        </ul>
+      </div>
+      
+      <%= form_with url: onboarding_path, method: :patch, local: true, class: "onboarding-form" do |form| %>
+        <%= form.hidden_field :step, value: @step %>
+        <div class="form-actions">
+          <%= form.submit "Start Exploring", class: "btn btn--primary btn--large" %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>

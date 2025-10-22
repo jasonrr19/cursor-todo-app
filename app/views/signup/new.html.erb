@@ -1,0 +1,37 @@
+<div class="signup-container">
+  <div class="signup-card">
+    <h1>Welcome to Cinema List Derby</h1>
+    <p class="signup-subtitle">Create your account to start discovering amazing movies</p>
+    
+    <%= form_with model: @user, url: signup_path, local: true, class: "signup-form" do |form| %>
+      <% if @user.errors.any? %>
+        <div class="error-messages">
+          <h3>Please fix the following errors:</h3>
+          <ul>
+            <% @user.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+      
+      <div class="form-group">
+        <%= form.label :display_name, "Display Name", class: "form-label" %>
+        <%= form.text_field :display_name, 
+            class: "form-input", 
+            placeholder: "Enter your display name",
+            required: true,
+            autofocus: true %>
+        <p class="form-help">This is how other users will see you on the platform</p>
+      </div>
+      
+      <div class="form-actions">
+        <%= form.submit "Create Account", class: "btn btn--primary btn--large" %>
+      </div>
+    <% end %>
+    
+    <div class="signup-footer">
+      <p>Already have an account? <a href="#" class="link">Sign in</a></p>
+    </div>
+  </div>
+</div>

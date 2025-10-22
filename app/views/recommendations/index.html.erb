@@ -1,0 +1,594 @@
+<div class="recommendations-container">
+  <div class="recommendations-header">
+    <h1>Your Recommendations</h1>
+    <p class="recommendations-subtitle">Movies tailored to your preferences</p>
+  </div>
+
+  <% if @recommendations.any? %>
+    <div class="recommendations-grid">
+      <% @recommendations.each do |movie| %>
+        <div class="movie-card">
+          <% if movie.poster_path %>
+            <img src="<%= movie.poster_url %>" alt="<%= movie.title %>" class="movie-poster">
+          <% else %>
+            <div class="movie-poster-placeholder" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); display: flex; align-items: center; justify-content: center; padding: 1rem; text-align: center;">
+              <div style="color: #fff; font-weight: 600; font-size: 1.1rem;"><%= movie.title %></div>
+            </div>
+          <% end %>
+          
+          <div class="movie-info">
+            <h3 class="movie-title"><%= movie.title %></h3>
+            <p class="movie-year"><%= movie.release_date&.year %></p>
+            <div class="movie-rating">
+              <span class="rating-value"><%= movie.vote_average.round(1) %></span>
+              <span class="rating-label">/10</span>
+            </div>
+            <div class="movie-genres">
+              <% movie.genres.limit(3).each do |genre| %>
+                <span class="genre-tag"><%= genre.name %></span>
+              <% end %>
+            </div>
+            <% if movie.overview.present? %>
+              <p class="movie-overview"><%= truncate(movie.overview, length: 120) %></p>
+            <% end %>
+            
+            <div class="movie-actions">
+              <%= link_to movie_path(movie), class: "btn btn--primary btn--tiny", style: "flex: 1;" do %>
+                👁️ View Details
+              <% end %>
+              <button class="btn btn--add-list btn--tiny" 
+                      data-movie-id="<%= movie.id %>"
+                      onclick="showListPicker(<%= movie.id %>)"
+                      style="flex: 1;">
+                ➕ Add
+              </button>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Serendipity Section -->
+    <% if @serendipity_suggestions.any? %>
+      <div class="serendipity-section">
+        <div class="serendipity-header">
+          <h2>🎬 Hidden Gems</h2>
+          <p class="serendipity-subtitle">Discover lesser-known films that might surprise you</p>
+        </div>
+        
+        <div class="serendipity-grid">
+          <% @serendipity_suggestions.each do |movie| %>
+            <div class="movie-card serendipity-card">
+              <% if movie.poster_path %>
+                <img src="<%= movie.poster_url %>" alt="<%= movie.title %>" class="movie-poster">
+              <% else %>
+                <div class="movie-poster-placeholder" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); display: flex; align-items: center; justify-content: center; padding: 1rem; text-align: center;">
+                  <div style="color: #fff; font-weight: 600; font-size: 1.1rem;"><%= movie.title %></div>
+                </div>
+              <% end %>
+              
+              <div class="movie-info">
+                <h3 class="movie-title"><%= movie.title %></h3>
+                <p class="movie-year"><%= movie.release_date&.year %></p>
+                <div class="movie-rating">
+                  <span class="rating-value"><%= movie.vote_average.round(1) %></span>
+                  <span class="rating-label">/10</span>
+                  <span class="vote-count">(<%= movie.vote_count %> votes)</span>
+                </div>
+                <div class="movie-genres">
+                  <% movie.genres.limit(3).each do |genre| %>
+                    <span class="genre-tag"><%= genre.name %></span>
+                  <% end %>
+                </div>
+                <% if movie.overview.present? %>
+                  <p class="movie-overview"><%= truncate(movie.overview, length: 100) %></p>
+                <% end %>
+                
+                <div class="movie-actions">
+                  <%= link_to movie_path(movie), class: "btn btn--primary btn--tiny", style: "flex: 1;" do %>
+                    👁️ View Details
+                  <% end %>
+                  <button class="btn btn--add-list btn--tiny" 
+                          data-movie-id="<%= movie.id %>"
+                          onclick="showListPicker(<%= movie.id %>)"
+                          style="flex: 1;">
+                    ➕ Add
+                  </button>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        
+        <div class="serendipity-actions">
+          <div class="serendipity-cta">
+            <h3>🎲 Feeling Adventurous?</h3>
+            <p>Discover even more hidden gems</p>
+            <div class="serendipity-buttons">
+              <a href="/recommendations/serendipity?mode=low" class="btn btn--serendipity">
+                <span class="serendipity-icon">🎯</span>
+                <span class="serendipity-label">Low-Vote Films</span>
+                <span class="serendipity-desc">Underrated treasures</span>
+              </a>
+              <a href="/recommendations/serendipity?mode=obscure" class="btn btn--serendipity">
+                <span class="serendipity-icon">💎</span>
+                <span class="serendipity-label">Obscure Films</span>
+                <span class="serendipity-desc">Rare discoveries</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  <% else %>
+    <% if @user&.user_preference %>
+      <%= render 'shared/empty_state',
+          icon: '🌍',
+          title: 'No exact matches found',
+          message: "We couldn't find movies that match all your preferences (#{@user.user_preference.preferred_genres.map(&:name).join(', ')} from #{@user.user_preference.preferred_countries.map(&:name).join(', ')}). Try browsing our full catalog or adjusting your preferences to discover more films!",
+          action_text: 'Browse All Movies',
+          action_path: root_path %>
+      <div style="text-align: center; margin-top: 1rem;">
+        <%= link_to 'Adjust Preferences', onboarding_path, class: 'btn btn--secondary' %>
+      </div>
+    <% else %>
+      <%= render 'shared/empty_state',
+          icon: '🎬',
+          title: 'No recommendations yet',
+          message: 'Complete your onboarding to get personalized movie recommendations!',
+          action_text: 'Set Up Preferences',
+          action_path: onboarding_path %>
+    <% end %>
+  <% end %>
+</div>
+
+<style>
+.recommendations-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.recommendations-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.recommendations-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.recommendations-subtitle {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+.recommendations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.movie-card {
+  background: var(--card-background);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.movie-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.movie-poster {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+}
+
+.movie-poster-placeholder {
+  width: 100%;
+  height: 400px;
+  background: var(--background-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  text-align: center;
+  padding: 1rem;
+}
+
+.movie-info {
+  padding: 1.5rem;
+}
+
+.movie-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.movie-year {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.movie-rating {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 1rem;
+}
+
+.rating-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+}
+
+.rating-label {
+  color: var(--text-secondary);
+  margin-left: 0.25rem;
+}
+
+.movie-genres {
+  margin-bottom: 1rem;
+}
+
+.genre-tag {
+  display: inline-block;
+  background: var(--accent-primary);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.movie-overview {
+  color: var(--text-secondary);
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+.no-recommendations {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: var(--card-background);
+  border-radius: 12px;
+}
+
+.no-recommendations h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.no-recommendations p {
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: var(--accent-primary);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.btn:hover {
+  background: var(--accent-secondary);
+}
+
+.btn--primary {
+  background: var(--accent-primary);
+}
+
+.btn--primary:hover {
+  background: var(--accent-secondary);
+}
+
+.btn--secondary {
+  background: var(--accent-secondary);
+}
+
+.btn--secondary:hover {
+  background: var(--accent-primary);
+}
+
+/* Serendipity Section Styles */
+.serendipity-section {
+  margin-top: 4rem;
+  padding-top: 3rem;
+  border-top: 2px solid var(--border-color);
+}
+
+.serendipity-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.serendipity-header h2 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.serendipity-subtitle {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+.serendipity-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.serendipity-card {
+  border: 2px solid var(--accent-primary);
+  position: relative;
+}
+
+.serendipity-card::before {
+  content: "✨";
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: var(--accent-primary);
+  color: white;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  z-index: 1;
+}
+
+.vote-count {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin-left: 0.5rem;
+}
+
+.serendipity-actions {
+  margin-top: 3rem;
+}
+
+/* Explore More Banner */
+.explore-more-banner {
+  margin-top: 2rem;
+  background: linear-gradient(135deg, rgba(0, 255, 255, 0.1) 0%, rgba(0, 200, 255, 0.1) 100%);
+  border: 2px solid var(--accent-primary);
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
+  }
+}
+
+.explore-content h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.explore-content p {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.btn--explore {
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+  padding: 1rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  box-shadow: 0 4px 15px rgba(0, 255, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn--explore:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 255, 255, 0.5);
+}
+
+/* Enhanced Add to List Button */
+.btn--add-list {
+  background: linear-gradient(135deg, #00d4ff 0%, #00a8ff 100%);
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn--add-list::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn--add-list:hover::before {
+  left: 100%;
+}
+
+.btn--add-list:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 212, 255, 0.5);
+  background: linear-gradient(135deg, #00a8ff 0%, #0088ff 100%);
+}
+
+.btn-icon {
+  font-size: 1.2rem;
+  display: inline-block;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+.btn-text {
+  display: inline-block;
+}
+
+/* Serendipity CTA Section */
+.serendipity-cta {
+  background: linear-gradient(135deg, rgba(255, 0, 255, 0.05) 0%, rgba(138, 43, 226, 0.05) 100%);
+  border: 3px solid #8a2be2;
+  border-radius: 20px;
+  padding: 3rem 2rem;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(138, 43, 226, 0.2);
+  animation: serendipity-pulse 4s ease-in-out infinite;
+}
+
+@keyframes serendipity-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 10px 30px rgba(138, 43, 226, 0.2);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 15px 40px rgba(138, 43, 226, 0.4);
+  }
+}
+
+.serendipity-cta h3 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  animation: rainbow-text 3s linear infinite;
+}
+
+@keyframes rainbow-text {
+  0% { color: #ff00ff; }
+  25% { color: #8a2be2; }
+  50% { color: #00ffff; }
+  75% { color: #8a2be2; }
+  100% { color: #ff00ff; }
+}
+
+.serendipity-cta > p {
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.serendipity-buttons {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn--serendipity {
+  background: linear-gradient(135deg, #8a2be2 0%, #9932cc 100%);
+  color: white;
+  padding: 1.5rem 2rem;
+  border: none;
+  border-radius: 16px;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 8px 20px rgba(138, 43, 226, 0.4);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn--serendipity::before {
+  content: '✨';
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  font-size: 3rem;
+  opacity: 0.1;
+  animation: sparkle 3s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+    opacity: 0.1;
+  }
+  50% {
+    transform: rotate(180deg) scale(1.5);
+    opacity: 0.3;
+  }
+}
+
+.btn--serendipity:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 12px 30px rgba(138, 43, 226, 0.6);
+  background: linear-gradient(135deg, #9932cc 0%, #8a2be2 100%);
+}
+
+.serendipity-icon {
+  font-size: 2.5rem;
+  display: block;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.serendipity-label {
+  font-size: 1.2rem;
+  font-weight: 700;
+  display: block;
+}
+
+.serendipity-desc {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  font-weight: 400;
+  display: block;
+}
+</style>

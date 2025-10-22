@@ -1,0 +1,416 @@
+<div class="serendipity-container">
+  <div class="serendipity-header">
+    <h1>🎬 Serendipity Discovery</h1>
+    <p class="serendipity-subtitle">
+      <% if @mode == 'low' %>
+        Discover films with fewer votes - hidden gems that deserve more attention
+      <% elsif @mode == 'obscure' %>
+        Explore the most obscure films - the deepest cuts in cinema
+      <% else %>
+        Discover lesser-known films that might surprise you
+      <% end %>
+    </p>
+  </div>
+
+  <% if @movies.any? %>
+    <div class="serendipity-mode-tabs">
+      <a href="/recommendations/serendipity?mode=low" 
+         class="mode-tab <%= 'active' if @mode == 'low' %>">
+        Low Vote Count
+      </a>
+      <a href="/recommendations/serendipity?mode=obscure" 
+         class="mode-tab <%= 'active' if @mode == 'obscure' %>">
+        Very Obscure
+      </a>
+    </div>
+
+    <div class="serendipity-grid">
+      <% @movies.each do |movie| %>
+        <div class="movie-card serendipity-card">
+          <%= link_to movie_path(movie), class: "movie-card-link" do %>
+            <% if movie.poster_path %>
+              <img src="<%= movie.poster_url %>" alt="<%= movie.title %>" class="movie-poster">
+            <% else %>
+              <div class="movie-poster-placeholder">
+                <span><%= movie.title %></span>
+              </div>
+            <% end %>
+            
+            <div class="movie-info">
+              <h3 class="movie-title"><%= movie.title %></h3>
+              <p class="movie-year"><%= movie.release_date&.year %></p>
+              <div class="movie-rating">
+                <span class="rating-value"><%= movie.vote_average.round(1) %></span>
+                <span class="rating-label">/10</span>
+                <span class="vote-count">(<%= movie.vote_count %> votes)</span>
+              </div>
+              <% if movie.popularity %>
+                <div class="popularity-info">
+                  <span class="popularity-label">Popularity:</span>
+                  <span class="popularity-value"><%= movie.popularity.round(2) %></span>
+                </div>
+              <% end %>
+              <div class="movie-genres">
+                <% movie.genres.limit(3).each do |genre| %>
+                  <span class="genre-tag"><%= genre.name %></span>
+                <% end %>
+              </div>
+              <% if movie.overview.present? %>
+                <p class="movie-overview"><%= truncate(movie.overview, length: 120) %></p>
+              <% end %>
+            </div>
+          <% end %>
+          
+          <div class="movie-actions">
+            <%= link_to "View Details", movie_path(movie), class: "btn btn--details" %>
+            <button class="btn btn--add-list btn--small" 
+                    data-movie-id="<%= movie.id %>"
+                    onclick="event.stopPropagation(); showListPicker(<%= movie.id %>)">
+              ➕ Add to List
+            </button>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="serendipity-actions">
+      <a href="/recommendations" class="btn btn--primary">Back to Recommendations</a>
+    </div>
+  <% else %>
+    <div class="no-serendipity">
+      <% if @user.nil? %>
+        <h3>🎬 Sign in to discover hidden gems</h3>
+        <p>Create an account and set up your preferences to get personalized serendipity suggestions!</p>
+        <a href="/signup" class="btn btn--primary">Get Started</a>
+      <% elsif @user.user_preference.nil? || @user.user_preference.preferred_genres.blank? %>
+        <h3>🎯 Complete your preferences first</h3>
+        <p>Tell us what you like so we can find amazing hidden gems tailored just for you!</p>
+        <a href="/onboarding" class="btn btn--primary">Set Up Preferences</a>
+      <% else %>
+        <h3>🔍 No <%= @mode == 'obscure' ? 'very obscure' : 'low-vote' %> films match your preferences</h3>
+        <p>Try the other serendipity mode or adjust your preferences to discover more hidden gems!</p>
+        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
+          <% if @mode == 'obscure' %>
+            <a href="/recommendations/serendipity?mode=low" class="btn btn--primary">Try Low-Vote Films</a>
+          <% else %>
+            <a href="/recommendations/serendipity?mode=obscure" class="btn btn--primary">Try Obscure Films</a>
+          <% end %>
+          <a href="/recommendations" class="btn btn--secondary">Back to Recommendations</a>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<style>
+.serendipity-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.serendipity-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.serendipity-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.serendipity-subtitle {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.serendipity-mode-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 3rem;
+}
+
+.mode-tab {
+  padding: 0.75rem 1.5rem;
+  background: var(--card-background);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--text-primary);
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.mode-tab:hover {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary);
+  color: white;
+}
+
+.mode-tab.active {
+  background: var(--accent-primary);
+  color: white;
+  border-color: var(--accent-primary);
+}
+
+.serendipity-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.movie-card {
+  background: var(--card-background);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.movie-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.movie-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  flex: 1;
+}
+
+.movie-card-link:hover .movie-title {
+  color: var(--accent-primary);
+}
+
+.serendipity-card {
+  border: 2px solid var(--accent-primary);
+  position: relative;
+}
+
+.serendipity-card::before {
+  content: "✨";
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: var(--accent-primary);
+  color: white;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  z-index: 1;
+}
+
+.movie-poster {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+}
+
+.movie-poster-placeholder {
+  width: 100%;
+  height: 400px;
+  background: var(--background-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  text-align: center;
+  padding: 1rem;
+}
+
+.movie-info {
+  padding: 1.5rem;
+}
+
+.movie-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.movie-year {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.movie-rating {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+}
+
+.rating-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+}
+
+.rating-label {
+  color: var(--text-secondary);
+  margin-left: 0.25rem;
+}
+
+.vote-count {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin-left: 0.5rem;
+}
+
+.popularity-info {
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.popularity-label {
+  color: var(--text-secondary);
+}
+
+.popularity-value {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.movie-genres {
+  margin-bottom: 1rem;
+}
+
+.genre-tag {
+  display: inline-block;
+  background: var(--accent-primary);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.movie-overview {
+  color: var(--text-secondary);
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+.movie-actions {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  gap: 0.5rem;
+  background: var(--background-secondary);
+}
+
+.btn--details {
+  flex: 1;
+  text-align: center;
+  padding: 0.625rem 1rem;
+  background: var(--accent-primary);
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.btn--details:hover {
+  background: var(--accent-secondary);
+  transform: translateY(-1px);
+}
+
+.btn--add-list {
+  flex: 1;
+  padding: 0.625rem 1rem;
+  background: transparent;
+  color: var(--accent-primary);
+  border: 2px solid var(--accent-primary);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn--add-list:hover {
+  background: var(--accent-primary);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.btn--small {
+  font-size: 0.85rem;
+}
+
+.serendipity-actions {
+  text-align: center;
+}
+
+.no-serendipity {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: var(--card-background);
+  border-radius: 12px;
+}
+
+.no-serendipity h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.no-serendipity p {
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: var(--accent-primary);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.btn:hover {
+  background: var(--accent-secondary);
+}
+
+.btn--primary {
+  background: var(--accent-primary);
+}
+
+.btn--primary:hover {
+  background: var(--accent-secondary);
+}
+
+.btn--secondary {
+  background: transparent;
+  border: 2px solid var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.btn--secondary:hover {
+  background: var(--accent-primary);
+  color: white;
+}
+</style>
+
+

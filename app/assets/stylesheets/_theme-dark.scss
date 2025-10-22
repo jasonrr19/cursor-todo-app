@@ -1,0 +1,73 @@
+// Cinema List Derby - Dark Theme Specific Styles
+
+[data-theme="dark"],
+.theme-dark {
+  // Override any dark theme specific styles here
+  // Most styles are handled by CSS custom properties in _themes.scss
+  
+  .card {
+    box-shadow: $shadow-lg;
+    border-color: $gray-700;
+    
+    &:hover {
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.1), $shadow-xl;
+    }
+  }
+  
+  .btn--primary {
+    background: linear-gradient(135deg, $neon-cyan, $neon-magenta);
+    color: $black;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    
+    &:hover:not(:disabled) {
+      box-shadow: 0 0 20px $neon-cyan, 0 0 40px $neon-cyan, 0 0 60px $neon-cyan;
+    }
+  }
+  
+  .btn--secondary {
+    border-color: $gray-600;
+    
+    &:hover:not(:disabled) {
+      border-color: $neon-cyan;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+    }
+  }
+  
+  .form-input:focus,
+  .form-textarea:focus,
+  .form-select:focus {
+    box-shadow: 0 0 0 3px rgba(0, 255, 255, 0.3);
+  }
+  
+  .theme-toggle {
+    border-color: $gray-600;
+    
+    &:hover {
+      border-color: $neon-cyan;
+      box-shadow: 0 0 15px $neon-cyan, 0 0 30px $neon-cyan;
+    }
+  }
+  
+  .header {
+    backdrop-filter: blur(20px);
+    background: rgba(17, 24, 39, 0.8);
+  }
+  
+  .footer {
+    background: rgba(17, 24, 39, 0.8);
+  }
+  
+  // Enhanced neon effects for dark theme
+  .movie-card:hover {
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.1), 0 0 40px rgba(0, 255, 255, 0.05);
+  }
+  
+  .badge--primary {
+    box-shadow: 0 0 10px currentColor;
+  }
+}
+
+
+
+
+
