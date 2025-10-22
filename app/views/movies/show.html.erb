@@ -55,7 +55,11 @@
             <button onclick="toggleWatched(<%= @movie.id %>, false)" class="btn btn--success btn--large">
               ✅ Watched
             </button>
-            <%= link_to '✍️ Write Review', new_movie_review_path(@movie), class: 'btn btn--primary btn--large' %>
+            <% if @user_review %>
+              <%= link_to '✏️ Edit Review', edit_movie_review_path(@movie, @user_review), class: 'btn btn--primary btn--large' %>
+            <% else %>
+              <%= link_to '✍️ Write Review', new_movie_review_path(@movie), class: 'btn btn--primary btn--large' %>
+            <% end %>
           <% else %>
             <button onclick="toggleWatched(<%= @movie.id %>, true)" class="btn btn--watched btn--large">
               👁️ Mark as Watched

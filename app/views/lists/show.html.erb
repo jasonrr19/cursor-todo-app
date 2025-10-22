@@ -59,10 +59,11 @@
           </div>
           
           <div class="movie-actions">
+            <%= link_to "👁️ View Details", movie_path(movie), class: "btn btn--primary btn--small", style: "margin-right: 10px;" %>
             <button class="btn btn--danger btn--small remove-movie" 
                     data-movie-id="<%= movie.id %>"
                     data-list-id="<%= @list.id %>">
-              Remove
+              ❌ Remove
             </button>
           </div>
         </div>
@@ -275,6 +276,9 @@
 
 .movie-actions {
   padding: 0 1.5rem 1.5rem;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .empty-list {
