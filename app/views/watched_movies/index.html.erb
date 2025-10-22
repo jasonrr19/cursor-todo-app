@@ -1,4 +1,4 @@
-<div class="home-hero">
+<div class="home-hero" style="text-align: center;">
   <h1>🎬 Watched Movies</h1>
   <p>Movies you've marked as watched</p>
 </div>
@@ -33,15 +33,29 @@
           </p>
           
           <div class="movie-actions" style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
-            <button class="btn btn--ghost btn--small" 
-                    onclick="toggleWatched(<%= movie.id %>, false)"
-                    style="background: transparent; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 4px; cursor: pointer;">
-              ❌ Unmark
-            </button>
+            <% user_review = @user&.reviews&.find_by(movie_id: movie.id) %>
+            <% if user_review %>
+              <a href="/movies/<%= movie.id %>/reviews/<%= user_review.id %>/edit" 
+                 class="btn btn--secondary btn--small"
+                 style="background: var(--accent-secondary); color: white; border: none; padding: 8px 12px; border-radius: 4px; text-decoration: none; display: inline-block;">
+                ✏️ Edit Review
+              </a>
+            <% else %>
+              <a href="/movies/<%= movie.id %>/reviews/new" 
+                 class="btn btn--secondary btn--small"
+                 style="background: var(--accent-secondary); color: white; border: none; padding: 8px 12px; border-radius: 4px; text-decoration: none; display: inline-block;">
+                ✍️ Write Review
+              </a>
+            <% end %>
             <button class="btn btn--primary btn--small" 
                     onclick="viewDetails(<%= movie.id %>)"
                     style="background: var(--accent-color); color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">
               👁️ Details
+            </button>
+            <button class="btn btn--ghost btn--small" 
+                    onclick="toggleWatched(<%= movie.id %>, false)"
+                    style="background: transparent; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 4px; cursor: pointer;">
+              ❌ Unmark
             </button>
           </div>
         </div>

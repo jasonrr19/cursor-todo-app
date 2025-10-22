@@ -11,3 +11,7 @@ bundle exec rails db:migrate
 echo "🎬 Resetting and seeding database..."
 bundle exec rails db:seed:replant DISABLE_DATABASE_ENVIRONMENT_CHECK=1
 
+# Remove any inappropriate films that may have been added
+echo "🧹 Cleaning up inappropriate content..."
+bundle exec rails db:movies:remove_inappropriate
+

@@ -26,6 +26,12 @@ class ListsController < ApplicationController
 
   def create
     @user = current_user
+    
+    unless @user
+      redirect_to root_path, alert: 'Please sign in to create a list.'
+      return
+    end
+    
     @list = @user.lists.build(list_params)
     
     # Check soft cap (100 lists per user)

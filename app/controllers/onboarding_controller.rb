@@ -65,13 +65,14 @@ class OnboardingController < ApplicationController
   def set_user_preference
     @user_preference = @user.user_preference || @user.build_user_preference
     
-    # Only initialize with empty arrays if this is a new record
+    # Only initialize with empty arrays if this is a truly new record (not persisted yet)
     if @user_preference.new_record?
       @user_preference.preferred_genres = []
       @user_preference.preferred_languages = []
       @user_preference.preferred_countries = []
       @user_preference.preferred_decades = []
       @user_preference.preferred_people = []
+      @user_preference.serendipity_intensity = 'medium'
       @user_preference.save!
     end
   end
