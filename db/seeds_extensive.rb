@@ -331,6 +331,8 @@ movies_data.each do |movie_data|
     m.popularity = movie_data[:popularity]
     m.overview = "A critically acclaimed film from #{movie_data[:release_date][0..3]}."
     m.tmdb_id = rand(100000..999999)
+    m.poster_path = movie_data[:poster_path]
+    m.backdrop_path = movie_data[:backdrop_path]
   end
   
   # Associate genres
