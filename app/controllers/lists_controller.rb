@@ -20,6 +20,11 @@ class ListsController < ApplicationController
   end
 
   def new
+    unless current_user
+      redirect_to root_path, alert: 'Please sign in to create a list.'
+      return
+    end
+    
     @list = List.new
     render layout: 'minimal'
   end

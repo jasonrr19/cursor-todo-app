@@ -55,7 +55,14 @@ class WatchedMoviesController < ApplicationController
   private
 
   def set_user
-    @user = current_user || User.first || User.create!(display_name: 'Demo User', theme_preference: 'system')
+    @user = current_user
+    
+    unless @user
+      respond_to do |format|
+        format.html { redirect_to root_path, alert: 'Please sign in to mark movies as watched.' }
+        format.json { render json: { success: false, error: 'Please sign in to mark movies as watched.' }, status: :unauthorized }
+      end
+    end
   end
 
   def set_movie

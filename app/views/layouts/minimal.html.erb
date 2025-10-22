@@ -1647,6 +1647,14 @@
           
           const data = await response.json();
           
+          // Check if user needs to sign in (401 Unauthorized)
+          if (response.status === 401) {
+            if (confirm('Please sign in to mark movies as watched. Would you like to sign up now?')) {
+              window.location.href = '/signup';
+            }
+            return;
+          }
+          
           if (data.success) {
             showNotification(data.message);
             updateWatchedButton(movieId, data.watched);
