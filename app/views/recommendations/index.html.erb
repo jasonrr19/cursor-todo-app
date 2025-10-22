@@ -5,10 +5,15 @@
   </div>
 
   <% if @fallback_mode && @user&.user_preference %>
+    <% 
+      genres = Genre.where(tmdb_id: @user.user_preference.preferred_genre_ids).pluck(:name)
+      languages = OriginalLanguage.where(iso_639_1: @user.user_preference.preferred_language_codes).pluck(:name)
+      countries = ProductionCountry.where(iso_3166_1: @user.user_preference.preferred_country_codes).pluck(:name)
+    %>
     <div class="fallback-notice">
       <span class="fallback-icon">ℹ️</span>
       <div class="fallback-content">
-        <strong>Good news!</strong> While we don't have <%= @user.user_preference.preferred_languages.map(&:name).join(', ') %> films from <%= @user.user_preference.preferred_countries.map(&:name).join(', ') %> right now, we've found some popular <strong><%= @user.user_preference.preferred_genres.map(&:name).join(', ') %></strong> films that might interest you!
+        <strong>Good news!</strong> While we don't have <%= languages.join(', ') %> films from <%= countries.join(', ') %> right now, we've found some popular <strong><%= genres.join(', ') %></strong> films that might interest you!
       </div>
     </div>
   <% end %>
@@ -131,10 +136,14 @@
     <% end %>
   <% else %>
     <% if @user&.user_preference %>
+      <% 
+        genres = Genre.where(tmdb_id: @user.user_preference.preferred_genre_ids).pluck(:name)
+        countries = ProductionCountry.where(iso_3166_1: @user.user_preference.preferred_country_codes).pluck(:name)
+      %>
       <%= render 'shared/empty_state',
           icon: '🌍',
           title: 'No exact matches found',
-          message: "We couldn't find movies that match all your preferences (#{@user.user_preference.preferred_genres.map(&:name).join(', ')} from #{@user.user_preference.preferred_countries.map(&:name).join(', ')}). Try browsing our full catalog or adjusting your preferences to discover more films!",
+          message: "We couldn't find movies that match all your preferences (#{genres.join(', ')} from #{countries.join(', ')}). Try browsing our full catalog or adjusting your preferences to discover more films!",
           action_text: 'Browse All Movies',
           action_path: root_path %>
       <div style="text-align: center; margin-top: 1rem;">
